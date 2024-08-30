@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="../static/style.css" />
+  </head>
+  <body>
+    <div id="chat"></div>
+    <form id="chat-form">
+      <input
+        type="text"
+        id="user"
+        placeholder="Escribe tu mensaje aquí"
+        style="width: 50%"
+        autocomplete="off"
+        required
+      />
+      <button type="submit">Enviar</button>
+    </form>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        function updateChat(messages) {
+          const chat = document.getElementById("chat");
+          chat.innerHTML = "";
+          messages.forEach((message) => {
+            const messageClass = message.role === "user" ? "user" : "assistant";
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `message ${messageClass}`;
+            messageDiv.textContent = message.content;
+            chat.appendChild(messageDiv);
+          });
+          chat.scrollTop = chat.scrollHeight;
+        }
+
+        document
+          .getElementById("chat-form")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            const userInput = document.getElementById("user").value;
+            document.getElementById("user").value = "";
+
+            fetch("/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ user: userInput }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                updateChat(data.messages);
+              })
+              .catch((error) => console.error("Error:", error));
+          });
+      });
+    </script>
+  </body>
+</html>
